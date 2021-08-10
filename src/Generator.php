@@ -35,7 +35,7 @@ class Generator
         $this->routeFilter = $options['filter'];
         $this->sync = $options['sync'];
         $this->testCaseGenerator = new  TestCaseGenerator();
-        $this->formatter = new  Formatter($this->directory, $this->sync);
+        $this->formatter = new  Formatter($this->sync);
     }
 
     /**

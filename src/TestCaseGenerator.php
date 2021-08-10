@@ -208,7 +208,10 @@ class TestCaseGenerator
     protected function isDateFormat(array|string $rules): bool
     {
         $format = array_filter($rules, function ($val) {
-            return preg_match('/^date_format/', $val);
+            if(is_string($val)) {
+                return preg_match('/^date_format/', $val);
+            }
+            return false;
         });
         return count($format);
     }

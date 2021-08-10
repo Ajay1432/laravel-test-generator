@@ -8,36 +8,33 @@ class Formatter
 
     protected string $file;
 
-    protected string $namespace;
-
     protected string $destinationFilePath;
-
-    protected string $directory;
 
     protected bool $sync;
 
-    public function __construct(string $directory, bool $sync)
+    public function __construct(bool $sync)
     {
-        $this->directory = $directory;
         $this->sync = $sync;
         $this->file = __DIR__ . '/Test/UserTest.php';
-        $this->namespace = 'namespace Tests\Feature' . ($this->directory ? '\\' . $this->directory : '') . ';';
-        $this->destinationFilePath = base_path('tests/Feature/' . $this->directory);
+        $this->destinationFilePath = base_path('tests/Feature/');
         $this->cases = [];
     }
 
 
     public function format(array $case, string $url, string $method, string $controllerName, string $actionName, mixed $auth): void
     {
-        $this->cases[$controllerName]['action'] = $actionName;
-        $this->cases[$controllerName]['url'] = $url;
-        $this->cases[$controllerName]['method'] = $method;
-        $this->cases[$controllerName]['params'] = $case;
-        $this->cases[$controllerName]['auth'] = $auth;
-        if (empty($this->cases[$controllerName]['function'])) {
-            $this->cases[$controllerName]['function'] = [];
+        $testName = $controllerName . $actionName;
+        $this->cases[$testName]['action'] = $actionName;
+        $this->cases[$testName]['url'] = $url;
+        $this->cases[$testName]['method'] = $method;
+        $this->cases[$testName]['params'] = $case;
+        $this->cases[$testName]['auth'] = $auth;
+        $this->cases[$testName]['directory'] = $controllerName;
+        if (empty($this->cases[$testName]['function'])) {
+            $this->cases[$testName]['function'] = [];
         }
-        $this->formatFunction($controllerName);
+
+        $this->formatFunction($testName);
     }
 
     /**
@@ -52,11 +49,11 @@ class Formatter
     /**
      * Set the function for success and failure case
      */
-    protected function formatFunction(string $controllerName): void
+    protected function formatFunction(string $testName): void
     {
         $functionName = '';
         $i = 0;
-        $controller = $this->cases[$controllerName];
+        $controller = $this->cases[$testName];
 
         foreach ($controller['params'] as $index => $item) {
             # Add function documentation
@@ -93,7 +90,7 @@ class Formatter
             $body .= PHP_EOL . PHP_EOL . "\t\t" . '$response->assertStatus(' . ($index == 'failure' ? '400' : '200') . ');' . PHP_EOL;
 
             # Add the function to the global array
-            $this->cases[$controllerName]['function'][] = [
+            $this->cases[$testName]['function'][] = [
                 'name' => $functionName,
                 'code' => $function . PHP_EOL . "\t" . '{' . PHP_EOL . $body . PHP_EOL . "\t" . '}' . PHP_EOL,
             ];
@@ -110,19 +107,25 @@ class Formatter
     {
         foreach ($this->cases as $key => $value) {
             $lines = file($this->file, FILE_IGNORE_NEW_LINES);
-            $lines[2] = $this->namespace;
+
+            $dirName = $value['directory'];
+            $namespace = "namespace Tests\Feature\\$dirName;";
+
+            $lines[2] = $namespace;
             $lines[8] = $this->getClassName($key, $lines[8]);
             $functions = implode(PHP_EOL, array_column($value['function'], 'code'));
             $content = array_merge(array_slice($lines, 0, 10), [$functions], array_slice($lines, 11));
 
-            $this->writeToFile($key . 'Test', $content);
+            $testDir = $this->destinationFilePath . DIRECTORY_SEPARATOR . $dirName;
+            $this->createDirectory($testDir);
+            $this->writeToFile($key . 'Test', $content, $testDir);
         }
     }
 
 
-    protected function writeToFile(string $controllerName, array $content): void
+    protected function writeToFile(string $testName, array $content, string $dir): void
     {
-        $fileName = $this->destinationFilePath . '/' . $controllerName . '.php';
+        $fileName = $dir . '/' . $testName . '.php';
         $file = fopen($fileName, 'w');
         foreach ($content as $value) {
             fwrite($file, $value . PHP_EOL);
@@ -133,9 +136,9 @@ class Formatter
     }
 
 
-    protected function getClassName(string $controllerName, string $line): string
+    protected function getClassName(string $testName, string $line): string
     {
-        return str_replace('UserTest', $controllerName . 'Test', $line);
+        return str_replace('UserTest', $testName . 'Test', $line);
     }
 
 
@@ -160,9 +163,9 @@ class Formatter
     }
 
 
-    protected function createDirectory(): void
+    protected function createDirectory(?string $dir = null): void
     {
-        $dirName = $this->destinationFilePath;
+        $dirName = $dir ?? $this->destinationFilePath;
         if (!is_dir($dirName)) {
             mkdir($dirName, 0755, true);
         }
