@@ -4,25 +4,19 @@ namespace Vigneshc91\LaravelTestGenerator;
 
 class Formatter
 {
-    protected $cases;
+    protected array $cases;
 
-    protected $file;
+    protected string $file;
 
-    protected $namespace;
+    protected string $namespace;
 
-    protected $destinationFilePath;
+    protected string $destinationFilePath;
 
-    protected $directory;
+    protected string $directory;
 
-    protected $sync;
+    protected bool $sync;
 
-    /**
-     * Initiate the options
-     *
-     * @param string  $directory
-     * @param boolean $sync
-     */
-    public function __construct($directory, $sync)
+    public function __construct(string $directory, bool $sync)
     {
         $this->directory = $directory;
         $this->sync = $sync;
@@ -32,17 +26,8 @@ class Formatter
         $this->cases = [];
     }
 
-    /**
-     * Format the test case in the controller
-     *
-     * @param array  $case
-     * @param string $url
-     * @param string $method
-     * @param string $controllerName
-     * @param string $actionName
-     * @return void
-     */
-    public function format($case, $url, $method, $controllerName, $actionName, $auth)
+
+    public function format(array $case, string $url, string $method, string $controllerName, string $actionName, mixed $auth): void
     {
         $this->cases[$controllerName]['action'] = $actionName;
         $this->cases[$controllerName]['url'] = $url;
@@ -57,8 +42,6 @@ class Formatter
 
     /**
      * Generate the files for all the test cases
-     *
-     * @return void
      */
     public function generate()
     {
@@ -68,10 +51,8 @@ class Formatter
 
     /**
      * Set the function for success and failure case
-     *
-     * @return void
      */
-    protected function formatFunction($controllerName)
+    protected function formatFunction(string $controllerName): void
     {
         $functionName = '';
         $i = 0;
@@ -124,10 +105,8 @@ class Formatter
 
     /**
      * Format the test cases for the writing to the file
-     *
-     * @return void
      */
-    protected function formatFile()
+    protected function formatFile(): void
     {
         foreach ($this->cases as $key => $value) {
             $lines = file($this->file, FILE_IGNORE_NEW_LINES);
@@ -140,18 +119,12 @@ class Formatter
         }
     }
 
-    /**
-     * Write the string into the file
-     *
-     * @param string $controllerName
-     * @param string $rule
-     * @return void
-     */
-    protected function writeToFile($controllerName, $content)
+
+    protected function writeToFile(string $controllerName, array $content): void
     {
         $fileName = $this->destinationFilePath . '/' . $controllerName . '.php';
         $file = fopen($fileName, 'w');
-        foreach ($content as $index => $value) {
+        foreach ($content as $value) {
             fwrite($file, $value . PHP_EOL);
         }
         fclose($file);
@@ -159,25 +132,14 @@ class Formatter
         echo "\033[32m" . basename($fileName) . ' Created Successfully' . PHP_EOL;
     }
 
-    /**
-     * Get the class name from the controller name
-     *
-     * @param string $controllerName
-     * @param string $line
-     * @return string
-     */
-    protected function getClassName($controllerName, $line)
+
+    protected function getClassName(string $controllerName, string $line): string
     {
         return str_replace('UserTest', $controllerName . 'Test', $line);
     }
 
-    /**
-     * Get the request parameters string array format for printing in the file
-     *
-     * @param array $param
-     * @return string
-     */
-    protected function getParams($param)
+
+    protected function getParams(array $param): string
     {
         if (empty($param)) {
             return '';
@@ -190,25 +152,15 @@ class Formatter
         return $param;
     }
 
-    /**
-     * Get the name of the test case function
-     *
-     * @param string $index
-     * @param string $action
-     * @return string
-     */
-    protected function getFunctionName($index, $action)
+
+    protected function getFunctionName(string $index, string $action): string
     {
         $name = 'test' . $action;
         return $index == 'failure' ? $name . 'WithError' : $name;
     }
 
-    /**
-     * Create a new directory if not exist
-     *
-     * @return void
-     */
-    protected function createDirectory()
+
+    protected function createDirectory(): void
     {
         $dirName = $this->destinationFilePath;
         if (!is_dir($dirName)) {

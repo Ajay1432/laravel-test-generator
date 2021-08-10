@@ -5,32 +5,31 @@ namespace Vigneshc91\LaravelTestGenerator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Str;
+use ReflectionException;
 use ReflectionMethod;
 
 class Generator
 {
-    protected $routeFilter;
+    protected mixed $routeFilter;
 
-    protected $originalUri;
+    protected string $originalUri;
 
-    protected $action;
+    protected string $action;
 
-    protected $config;
+    protected array $config;
 
-    protected $testCaseGenerator;
+    protected TestCaseGenerator $testCaseGenerator;
 
-    protected $formatter;
+    protected Formatter $formatter;
 
-    protected $directory;
+    protected mixed $directory;
 
-    protected $sync;
+    protected bool $sync;
 
     /**
      * Initiate the global parameters
-     *
-     * @param array $options
      */
-    public function __construct($options)
+    public function __construct(array $options)
     {
         $this->directory = $options['directory'];
         $this->routeFilter = $options['filter'];
@@ -41,10 +40,9 @@ class Generator
 
     /**
      * Generate the route methods and write to the file
-     *
-     * @return void
+     * @throws ReflectionException
      */
-    public function generate()
+    public function generate(): void
     {
         $this->getRouteMethods();
         $this->formatter->generate();
@@ -52,16 +50,15 @@ class Generator
 
     /**
      * Get the route detail and generate the test cases
-     *
-     * @return void
+     * @throws ReflectionException
      */
-    protected function getRouteMethods()
+    protected function getRouteMethods(): void
     {
         foreach ($this->getAppRoutes() as $route) {
             $this->originalUri = $uri = $this->getRouteUri($route);
-            $this->uri = $this->strip_optional_char($uri);
+            $uri1 = $this->strip_optional_char($uri);
 
-            if ($this->routeFilter && !preg_match('/^' . preg_quote($this->routeFilter, '/') . '/', $this->uri)) {
+            if ($this->routeFilter && !preg_match('/^' . preg_quote($this->routeFilter, '/') . '/', $uri1)) {
                 continue;
             }
 
@@ -72,9 +69,9 @@ class Generator
             $controllerName = $this->getControllerName($route->getActionName());
 
             foreach ($methods as $method) {
-                $this->method = strtoupper($method);
+                $method1 = strtoupper($method);
 
-                if (in_array($this->method, ['HEAD'])) continue;
+                if ($method1 == 'HEAD') continue;
 
                 $rules = $this->getFormRules($action);
                 if (empty($rules)) {
@@ -82,7 +79,7 @@ class Generator
                 }
                 $case = $this->testCaseGenerator->generate($rules);
                 $hasAuth = $this->isAuthorizationExist($route->middleware());
-                $this->formatter->format($case, $this->uri, $this->method, $controllerName, $actionName, $hasAuth);
+                $this->formatter->format($case, $uri1, $method1, $controllerName, $actionName, $hasAuth);
 
             }
         }
@@ -90,11 +87,8 @@ class Generator
 
     /**
      * Check authorization middleware is exist
-     *
-     * @param array $middlewares
-     * @return boolean
      */
-    protected function isAuthorizationExist($middlewares)
+    protected function isAuthorizationExist(array $middlewares): array
     {
         $hasAuth = array_filter($middlewares, function ($var) {
             return (strpos($var, 'auth') > -1);
@@ -105,11 +99,8 @@ class Generator
 
     /**
      * Replace the optional params from the URL
-     *
-     * @param string $uri
-     * @return string
      */
-    protected function strip_optional_char($uri)
+    protected function strip_optional_char(string $uri): string|array
     {
         return str_replace('?', '', $uri);
     }
@@ -119,18 +110,13 @@ class Generator
      *
      * @return array|Route[]
      */
-    protected function getAppRoutes()
+    protected function getAppRoutes(): mixed
     {
         return app('router')->getRoutes();
     }
 
-    /**
-     * Get the URI of the route
-     *
-     * @param Route $route
-     * @return string
-     */
-    protected function getRouteUri(Route $route)
+
+    protected function getRouteUri(Route $route): string
     {
         $uri = $route->uri();
 
@@ -142,14 +128,13 @@ class Generator
     }
 
     /**
-     * Get the form rules for creating the parameters
-     *
-     * @param [type] $action
-     * @return array
+     * @throws ReflectionException
      */
-    protected function getFormRules($action)
+    protected function getFormRules(mixed $action): ?array
     {
-        if (!is_string($action)) return false;
+        if (!is_string($action)) {
+            return null;
+        }
 
         $parsedAction = Str::parseCallback($action);
 
@@ -163,15 +148,12 @@ class Generator
                 return (new $class)->rules();
             }
         }
+
+        return null;
     }
 
-    /**
-     * Return's the controller name
-     *
-     * @param string $controller
-     * @return string
-     */
-    protected function getControllerName($controller)
+
+    protected function getControllerName(string $controller): string
     {
         $namespaceReplaced = substr($controller, strrpos($controller, '\\') + 1);
         $actionNameReplaced = substr($namespaceReplaced, 0, strpos($namespaceReplaced, '@'));
@@ -182,13 +164,7 @@ class Generator
         return $controllerName;
     }
 
-    /**
-     * Return's the action name
-     *
-     * @param string $actionName
-     * @return string
-     */
-    protected function getActionName($actionName)
+    protected function getActionName(string $actionName): string
     {
         $actionNameSubString = substr($actionName, strpos($actionName, '@') + 1);
         $actionNameArray = preg_split('/(?=[A-Z])/', ucfirst($actionNameSubString));

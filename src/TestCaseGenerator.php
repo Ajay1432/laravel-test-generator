@@ -3,60 +3,44 @@
 namespace Vigneshc91\LaravelTestGenerator;
 
 use Faker;
+use Faker\Generator;
 
 class TestCaseGenerator
 {
-    protected $faker;
+    protected Generator $faker;
 
-    protected $params;
+    protected array|string $params;
 
-    protected $cases;
+    protected array $cases;
 
-    protected $rules;
+    protected array|string $rules;
 
-    /**
-     * Initiates the global parameters
-     */
+
     public function __construct()
     {
         $this->faker = Faker\Factory::create();
         $this->cases = [];
     }
 
-    /**
-     * Initialize the params and rules and generates the test cases
-     *
-     * @param array $rules
-     * @return array
-     */
-    public function generate($rules)
+    public function generate(array|string $rules): array
     {
         $this->params = array_keys($rules);
         $this->rules = array_values($rules);
         return $this->generateCase();
     }
 
-    /**
-     * Generate success and failure test case
-     *
-     * @return void
-     */
-    protected function generateCase()
+
+    protected function generateCase(): array
     {
         $this->generateFailureCase();
         $this->generateSuccessCase();
         return $this->cases;
     }
 
-    /**
-     * Generate the success test case
-     *
-     * @return void
-     */
-    protected function generateSuccessCase()
+
+    protected function generateSuccessCase(): void
     {
         $case = [];
-        $value = '';
         foreach ($this->params as $key => $val) {
             $case[$val] = $this->getValue(is_string($val) ? $val : strval($val), $this->rules[$key]);
         }
@@ -64,14 +48,8 @@ class TestCaseGenerator
         $this->cases['success'] = $case;
     }
 
-    /**
-     * Get the value for the given field with the applied rules
-     *
-     * @param string $param
-     * @param [array] $rules
-     * @return string
-     */
-    protected function getValue($param, $rules)
+
+    protected function getValue(array|string $param, array|string $rules): string
     {
         if (is_string($rules)) {
             $rules = explode('|', $rules);
@@ -136,187 +114,98 @@ class TestCaseGenerator
         return $value;
     }
 
-    /**
-     * Check whether email is applicable for the given field
-     *
-     * @param array $rules
-     * @return boolean
-     */
-    protected function isEmail($rules)
+
+    protected function isEmail(array|string $rules): bool
     {
         return in_array('email', $rules);
     }
 
-    /**
-     * Check whether company name is applicable for the given field
-     *
-     * @param array  $rules
-     * @param string $param
-     * @return boolean
-     */
-    protected function isCompanyName($rules, $param)
+
+    protected function isCompanyName(array|string $rules, array|string $param): bool
     {
-        return strpos('company', $param) !== false && in_array('string', $rules);
+        return str_contains('company', $param) !== false && in_array('string', $rules);
     }
 
-    /**
-     * Check whether address is applicable for the given field
-     *
-     * @param array  $rules
-     * @param string $param
-     * @return boolean
-     */
-    protected function isAddress($rules, $param)
+
+    protected function isAddress(array|string $rules, array|string $param): bool
     {
-        return strpos('address', $param) !== false && in_array('string', $rules);
+        return str_contains('address', $param) !== false && in_array('string', $rules);
     }
 
-    /**
-     * Check whether name is applicable for the given field
-     *
-     * @param array  $rules
-     * @param string $param
-     * @return boolean
-     */
-    protected function isName($rules, $param)
+
+    protected function isName(array|string $rules, array|string $param): bool
     {
-        return strpos('name', $param) !== false && in_array('string', $rules);
+        return str_contains('name', $param) !== false && in_array('string', $rules);
     }
 
-    /**
-     * Check whether stree name is applicable for the given field
-     *
-     * @param array  $rules
-     * @param string $param
-     * @return boolean
-     */
-    protected function isStreetName($rules, $param)
+
+    protected function isStreetName(array|string $rules, array|string $param): bool
     {
-        return strpos('street', $param) !== false && in_array('string', $rules);
+        return str_contains('street', $param) !== false && in_array('string', $rules);
     }
 
-    /**
-     * Check whether street address is applicable for the given field
-     *
-     * @param array  $rules
-     * @param string $param
-     * @return boolean
-     */
-    protected function isStreetAddress($rules, $param)
+
+    protected function isStreetAddress(array|string $rules, array|string $param): bool
     {
-        return strpos('street_address', $param) !== false && in_array('string', $rules);
+        return str_contains('street_address', $param) !== false && in_array('string', $rules);
     }
 
-    /**
-     * Check whether city is applicable for the given field
-     *
-     * @param array  $rules
-     * @param string $param
-     * @return boolean
-     */
-    protected function isCity($rules, $param)
+
+    protected function isCity(array|string $rules, array|string $param): bool
     {
-        return strpos('city', $param) !== false && in_array('string', $rules);
+        return str_contains('city', $param) !== false && in_array('string', $rules);
     }
 
-    /**
-     * Check whether state is applicable for the given field
-     *
-     * @param array  $rules
-     * @param string $param
-     * @return boolean
-     */
-    protected function isState($rules, $param)
+
+    protected function isState(array|string $rules, array|string $param): bool
     {
-        return strpos('state', $param) !== false && in_array('string', $rules);
+        return str_contains('state', $param) !== false && in_array('string', $rules);
     }
 
-    /**
-     * Check whether country is applicable for the given field
-     *
-     * @param array  $rules
-     * @param string $param
-     * @return boolean
-     */
-    protected function isCountry($rules, $param)
+
+    protected function isCountry(array|string $rules, array|string $param): bool
     {
-        return strpos('country', $param) !== false && in_array('string', $rules);
+        return str_contains('country', $param) !== false && in_array('string', $rules);
     }
 
-    /**
-     * Check whether zip is applicable for the given field
-     *
-     * @param array  $rules
-     * @param string $param
-     * @return boolean
-     */
-    protected function isZip($rules, $param)
+
+    protected function isZip(array|string $rules, array|string $param): bool
     {
-        return (strpos('zip', $param) !== false || strpos('pin', $param) !== false) && in_array('string', $rules);
+        return (str_contains('zip', $param) !== false || str_contains('pin', $param) !== false) && in_array('string', $rules);
     }
 
-    /**
-     * Check whether latitude is applicable for the given field
-     *
-     * @param string $param
-     * @return boolean
-     */
-    protected function isLatitude($param)
+
+    protected function isLatitude(array|string $param): bool
     {
-        return strpos('latitude', $param) !== false;
+        return str_contains('latitude', $param) !== false;
     }
 
-    /**
-     * Check whether longitude is applicable for the given field
-     *
-     * @param string $param
-     * @return boolean
-     */
-    protected function isLongitude($param)
+
+    protected function isLongitude(array|string $param): bool
     {
-        return strpos('longitude', $param) !== false;
+        return str_contains('longitude', $param) !== false;
     }
 
-    /**
-     * Check whether phone number is applicable for the given field
-     *
-     * @param string $param
-     * @return boolean
-     */
-    protected function isPhone($param)
+
+    protected function isPhone(array|string $param): bool
     {
-        return strpos('phone', $param) !== false || strpos('mobile', $param) !== false;
+        return str_contains('phone', $param) || str_contains('mobile', $param) !== false;
     }
 
-    /**
-     * Check whether boolean type is applicable for the given field
-     *
-     * @param array $rules
-     * @return boolean
-     */
-    protected function isBoolean($rules)
+
+    protected function isBoolean(array|string $rules): bool
     {
         return in_array('boolean', $rules);
     }
 
-    /**
-     * Check whether date type is applicable for the given field
-     *
-     * @param array $rules
-     * @return boolean
-     */
-    protected function isDate($rules)
+
+    protected function isDate(array|string $rules): bool
     {
         return in_array('date', $rules);
     }
 
-    /**
-     * Check whether date or time is applicable for the given field
-     *
-     * @param array $rules
-     * @return boolean
-     */
-    protected function isDateFormat($rules)
+
+    protected function isDateFormat(array|string $rules): bool
     {
         $format = array_filter($rules, function ($val) {
             return preg_match('/^date_format/', $val);
