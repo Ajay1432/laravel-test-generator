@@ -64,7 +64,7 @@ class Generator
 
             if ($this->routeFilter && !preg_match('/^' . preg_quote($this->routeFilter, '/') . '/', $this->uri)) {
                 continue;
-            }   
+            }
 
             $action = $route->getAction('uses');
             $methods = $route->methods();
@@ -118,7 +118,7 @@ class Generator
     /**
      * Get the routes of the application
      *
-     * @return array
+     * @return array|Route[]
      */
     protected function getAppRoutes()
     {
@@ -135,7 +135,7 @@ class Generator
     {
         $uri = $route->uri();
 
-        if (!starts_with($uri, '/')) {
+        if (!str_starts_with($uri, '/')) {
             $uri = '/' . $uri;
         }
 

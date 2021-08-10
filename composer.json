@@ -9,7 +9,10 @@
         }
     ],
     "require": {
-        "fzaninotto/faker": "^1.8"
+        "php": "^8.0",
+        "ext-json": "*",
+        "fzaninotto/faker": "^1.8",
+        "laravel/framework": "^8.18"
     },
     "autoload": {
         "psr-4": {

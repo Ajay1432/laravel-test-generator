@@ -133,7 +133,7 @@ class Formatter
             $lines = file($this->file, FILE_IGNORE_NEW_LINES);
             $lines[2] = $this->namespace;
             $lines[8] = $this->getClassName($key, $lines[8]);
-            $functions = implode(PHP_EOL, array_pluck($value['function'], 'code'));
+            $functions = implode(PHP_EOL, array_column($value['function'], 'code'));
             $content = array_merge(array_slice($lines, 0, 10) , [$functions] , array_slice($lines, 11));
             
             $this->writeToFile($key . 'Test', $content);
