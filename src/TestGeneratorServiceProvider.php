@@ -15,7 +15,7 @@ class TestGeneratorServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
-                TestGenerator::class
+                TestGenerator::class,
             ]);
         }
     }

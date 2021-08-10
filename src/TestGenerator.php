@@ -42,8 +42,8 @@ class TestGenerator extends Command
     {
         $options = [
             'directory' => $this->option('dir') ? $this->option('dir') : '',
-            'sync' => $this->option('sync') ? true : false,  
-            'filter' => $this->option('filter')
+            'sync'      => $this->option('sync') ? true : false,
+            'filter'    => $this->option('filter'),
         ];
         $generator = new Generator($options);
         $generator->generate();

@@ -13,7 +13,7 @@ class TestCaseGenerator
     protected $cases;
 
     protected $rules;
-    
+
     /**
      * Initiates the global parameters
      */
@@ -73,7 +73,7 @@ class TestCaseGenerator
      */
     protected function getValue($param, $rules)
     {
-        if(is_string($rules)) {
+        if (is_string($rules)) {
             $rules = explode('|', $rules);
         }
         $value = '';
@@ -125,14 +125,14 @@ class TestCaseGenerator
                 $value = $this->faker->date;
                 break;
             case $this->isDateFormat($rules):
-                $format = array_values(array_filter($rules, function($val){
+                $format = array_values(array_filter($rules, function ($val) {
                     return preg_match('/^date_format/', $val);
                 }));
                 $format = str_replace('date_format:', '', $format[0]);
                 $value = $this->faker->date($format);
                 break;
         }
-        
+
         return $value;
     }
 
@@ -150,7 +150,7 @@ class TestCaseGenerator
     /**
      * Check whether company name is applicable for the given field
      *
-     * @param array $rules
+     * @param array  $rules
      * @param string $param
      * @return boolean
      */
@@ -162,7 +162,7 @@ class TestCaseGenerator
     /**
      * Check whether address is applicable for the given field
      *
-     * @param array $rules
+     * @param array  $rules
      * @param string $param
      * @return boolean
      */
@@ -174,7 +174,7 @@ class TestCaseGenerator
     /**
      * Check whether name is applicable for the given field
      *
-     * @param array $rules
+     * @param array  $rules
      * @param string $param
      * @return boolean
      */
@@ -186,7 +186,7 @@ class TestCaseGenerator
     /**
      * Check whether stree name is applicable for the given field
      *
-     * @param array $rules
+     * @param array  $rules
      * @param string $param
      * @return boolean
      */
@@ -198,7 +198,7 @@ class TestCaseGenerator
     /**
      * Check whether street address is applicable for the given field
      *
-     * @param array $rules
+     * @param array  $rules
      * @param string $param
      * @return boolean
      */
@@ -210,7 +210,7 @@ class TestCaseGenerator
     /**
      * Check whether city is applicable for the given field
      *
-     * @param array $rules
+     * @param array  $rules
      * @param string $param
      * @return boolean
      */
@@ -222,7 +222,7 @@ class TestCaseGenerator
     /**
      * Check whether state is applicable for the given field
      *
-     * @param array $rules
+     * @param array  $rules
      * @param string $param
      * @return boolean
      */
@@ -234,7 +234,7 @@ class TestCaseGenerator
     /**
      * Check whether country is applicable for the given field
      *
-     * @param array $rules
+     * @param array  $rules
      * @param string $param
      * @return boolean
      */
@@ -246,13 +246,13 @@ class TestCaseGenerator
     /**
      * Check whether zip is applicable for the given field
      *
-     * @param array $rules
+     * @param array  $rules
      * @param string $param
      * @return boolean
      */
     protected function isZip($rules, $param)
     {
-        return (strpos('zip', $param) !== false || strpos('pin', $param) !== false ) && in_array('string', $rules);
+        return (strpos('zip', $param) !== false || strpos('pin', $param) !== false) && in_array('string', $rules);
     }
 
     /**
@@ -309,7 +309,7 @@ class TestCaseGenerator
     {
         return in_array('date', $rules);
     }
-    
+
     /**
      * Check whether date or time is applicable for the given field
      *
@@ -318,7 +318,7 @@ class TestCaseGenerator
      */
     protected function isDateFormat($rules)
     {
-        $format = array_filter($rules, function($val){
+        $format = array_filter($rules, function ($val) {
             return preg_match('/^date_format/', $val);
         });
         return count($format);

@@ -15,18 +15,18 @@ class Formatter
     protected $directory;
 
     protected $sync;
-    
+
     /**
      * Initiate the options
      *
-     * @param string $directory
+     * @param string  $directory
      * @param boolean $sync
      */
     public function __construct($directory, $sync)
     {
         $this->directory = $directory;
         $this->sync = $sync;
-        $this->file = __DIR__.'/Test/UserTest.php';
+        $this->file = __DIR__ . '/Test/UserTest.php';
         $this->namespace = 'namespace Tests\Feature' . ($this->directory ? '\\' . $this->directory : '') . ';';
         $this->destinationFilePath = base_path('tests/Feature/' . $this->directory);
         $this->cases = [];
@@ -35,7 +35,7 @@ class Formatter
     /**
      * Format the test case in the controller
      *
-     * @param array $case
+     * @param array  $case
      * @param string $url
      * @param string $method
      * @param string $controllerName
@@ -49,7 +49,7 @@ class Formatter
         $this->cases[$controllerName]['method'] = $method;
         $this->cases[$controllerName]['params'] = $case;
         $this->cases[$controllerName]['auth'] = $auth;
-        if(empty($this->cases[$controllerName]['function'])) {
+        if (empty($this->cases[$controllerName]['function'])) {
             $this->cases[$controllerName]['function'] = [];
         }
         $this->formatFunction($controllerName);
@@ -80,13 +80,13 @@ class Formatter
         foreach ($controller['params'] as $index => $item) {
             # Add function documentation
             $function = "\t" . '/**' . PHP_EOL . "\t" . ' * ' . $controller['action'] . PHP_EOL . "\t" . ' *' . PHP_EOL;
-            
+
             # Check @depends to be added or not
-            if($this->sync) {
-                if($i > 0) {
+            if ($this->sync) {
+                if ($i > 0) {
                     $function .= "\t" . ' * @depends ' . $functionName . PHP_EOL;
                 } else {
-                    if(count($controller['function']) > 0) {
+                    if (count($controller['function']) > 0) {
                         $function .= "\t" . ' * @depends ' . end($controller['function'])['name'] . PHP_EOL;
                     }
                 }
@@ -94,32 +94,32 @@ class Formatter
 
             $function .= "\t" . ' * @return void' . PHP_EOL . "\t" . ' */' . PHP_EOL;
             $functionName = $this->getFunctionName($index, $controller['action']);
-            
+
             # Function name and declaration
             $function .= "\t" . 'public function ' . $functionName . '()';
-            
+
             # Function definition
-            $body = "\t\t".'$response = $this->json(\'' . strtoupper($controller['method']) . '\', \'' . $controller['url'] . '\', [';
-            
+            $body = "\t\t" . '$response = $this->json(\'' . strtoupper($controller['method']) . '\', \'' . $controller['url'] . '\', [';
+
             # Request parameters
             $params = $this->getParams($item);
-            $body .= $params ? PHP_EOL . $params . PHP_EOL . "\t\t". ']' : ']';
-            
-            $body .= $controller['auth'] ? ", [\n\t\t\t'Authorization' => 'Bearer '\n\t\t]" : ''; 
+            $body .= $params ? PHP_EOL . $params . PHP_EOL . "\t\t" . ']' : ']';
+
+            $body .= $controller['auth'] ? ", [\n\t\t\t'Authorization' => 'Bearer '\n\t\t]" : '';
 
             $body .= ');';
             # Assert response
             $body .= PHP_EOL . PHP_EOL . "\t\t" . '$response->assertStatus(' . ($index == 'failure' ? '400' : '200') . ');' . PHP_EOL;
-            
+
             # Add the function to the global array
             $this->cases[$controllerName]['function'][] = [
                 'name' => $functionName,
-                'code' => $function . PHP_EOL . "\t" . '{' . PHP_EOL . $body . PHP_EOL . "\t" . '}' . PHP_EOL
+                'code' => $function . PHP_EOL . "\t" . '{' . PHP_EOL . $body . PHP_EOL . "\t" . '}' . PHP_EOL,
             ];
 
             $i++;
         }
-           
+
     }
 
     /**
@@ -134,8 +134,8 @@ class Formatter
             $lines[2] = $this->namespace;
             $lines[8] = $this->getClassName($key, $lines[8]);
             $functions = implode(PHP_EOL, array_column($value['function'], 'code'));
-            $content = array_merge(array_slice($lines, 0, 10) , [$functions] , array_slice($lines, 11));
-            
+            $content = array_merge(array_slice($lines, 0, 10), [$functions], array_slice($lines, 11));
+
             $this->writeToFile($key . 'Test', $content);
         }
     }
@@ -152,11 +152,11 @@ class Formatter
         $fileName = $this->destinationFilePath . '/' . $controllerName . '.php';
         $file = fopen($fileName, 'w');
         foreach ($content as $index => $value) {
-            fwrite($file, $value.PHP_EOL);
+            fwrite($file, $value . PHP_EOL);
         }
         fclose($file);
 
-        echo "\033[32m". basename($fileName). ' Created Successfully'. PHP_EOL;
+        echo "\033[32m" . basename($fileName) . ' Created Successfully' . PHP_EOL;
     }
 
     /**
@@ -179,12 +179,12 @@ class Formatter
      */
     protected function getParams($param)
     {
-        if(empty($param)) {
+        if (empty($param)) {
             return '';
         }
         $param = json_encode($param);
         $param = str_replace(['{', '}'], '', $param);
-        $param = "\t\t\t".$param;
+        $param = "\t\t\t" . $param;
         $param = str_replace('":', '" => ', $param);
         $param = str_replace(',', ",\n\t\t\t", $param);
         return $param;
@@ -211,7 +211,7 @@ class Formatter
     protected function createDirectory()
     {
         $dirName = $this->destinationFilePath;
-        if(!is_dir($dirName)) {
+        if (!is_dir($dirName)) {
             mkdir($dirName, 0755, true);
         }
     }

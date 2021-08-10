@@ -2,11 +2,10 @@
 
 namespace Vigneshc91\LaravelTestGenerator;
 
-use ReflectionMethod;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Str;
-use Illuminate\Foundation\Http\FormRequest;
-use Vigneshc91\LaravelTestGenerator\TestCaseGenerator;
+use ReflectionMethod;
 
 class Generator
 {
@@ -69,22 +68,22 @@ class Generator
             $action = $route->getAction('uses');
             $methods = $route->methods();
             $actionName = $this->getActionName($route->getActionName());
-            
+
             $controllerName = $this->getControllerName($route->getActionName());
 
             foreach ($methods as $method) {
                 $this->method = strtoupper($method);
-                
+
                 if (in_array($this->method, ['HEAD'])) continue;
-                
+
                 $rules = $this->getFormRules($action);
-                if(empty($rules)) {
+                if (empty($rules)) {
                     $rules = [];
                 }
                 $case = $this->testCaseGenerator->generate($rules);
                 $hasAuth = $this->isAuthorizationExist($route->middleware());
                 $this->formatter->format($case, $this->uri, $this->method, $controllerName, $actionName, $hasAuth);
-                
+
             }
         }
     }
@@ -97,8 +96,8 @@ class Generator
      */
     protected function isAuthorizationExist($middlewares)
     {
-        $hasAuth = array_filter($middlewares, function ($var) { 
-            return (strpos($var, 'auth') > -1); 
+        $hasAuth = array_filter($middlewares, function ($var) {
+            return (strpos($var, 'auth') > -1);
         });
 
         return $hasAuth;
@@ -151,15 +150,15 @@ class Generator
     protected function getFormRules($action)
     {
         if (!is_string($action)) return false;
-        
+
         $parsedAction = Str::parseCallback($action);
-        
+
         $reflector = (new ReflectionMethod($parsedAction[0], $parsedAction[1]));
         $parameters = $reflector->getParameters();
-        
+
         foreach ($parameters as $parameter) {
             $class = optional($parameter->getType())->getName();
-            
+
             if (is_subclass_of($class, FormRequest::class)) {
                 return (new $class)->rules();
             }
@@ -174,7 +173,7 @@ class Generator
      */
     protected function getControllerName($controller)
     {
-        $namespaceReplaced = substr($controller, strrpos($controller, '\\')+1);
+        $namespaceReplaced = substr($controller, strrpos($controller, '\\') + 1);
         $actionNameReplaced = substr($namespaceReplaced, 0, strpos($namespaceReplaced, '@'));
         $controllerReplaced = str_replace('Controller', '', $actionNameReplaced);
         $controllerNameArray = preg_split('/(?=[A-Z])/', $controllerReplaced);
@@ -191,7 +190,7 @@ class Generator
      */
     protected function getActionName($actionName)
     {
-        $actionNameSubString = substr($actionName, strpos($actionName, '@')+1);
+        $actionNameSubString = substr($actionName, strpos($actionName, '@') + 1);
         $actionNameArray = preg_split('/(?=[A-Z])/', ucfirst($actionNameSubString));
         $actionName = trim(implode('', $actionNameArray));
 
