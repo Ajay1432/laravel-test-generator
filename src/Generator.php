@@ -22,8 +22,6 @@ class Generator
 
     protected Formatter $formatter;
 
-    protected mixed $directory;
-
     protected bool $sync;
 
     /**
@@ -31,7 +29,6 @@ class Generator
      */
     public function __construct(array $options)
     {
-        $this->directory = $options['directory'];
         $this->routeFilter = $options['filter'];
         $this->sync = $options['sync'];
         $this->testCaseGenerator = new  TestCaseGenerator();

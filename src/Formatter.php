@@ -83,7 +83,7 @@ class Formatter
             $params = $this->getParams($item);
             $body .= $params ? PHP_EOL . $params . PHP_EOL . "\t\t" . ']' : ']';
 
-            $body .= $controller['auth'] ? ", [\n\t\t\t'Authorization' => 'Bearer '\n\t\t]" : '';
+            $body .= $controller['auth'] ? ", [\n\t\t\t'Authorization' => \"Bearer \$this->token\"\n\t\t]" : '';
 
             $body .= ');';
             # Assert response
