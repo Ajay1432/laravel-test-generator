@@ -41,21 +41,23 @@ class Generator
      */
     public function generate(): void
     {
-        $this->getRouteMethods();
-        $this->formatter->generate();
+        $cases = $this->getCases();
+
+        $this->formatter->generate($cases);
     }
 
     /**
      * Get the route detail and generate the test cases
      * @throws ReflectionException
      */
-    protected function getRouteMethods(): void
+    protected function getCases(): array
     {
+        $cases = [];
         foreach ($this->getAppRoutes() as $route) {
             $this->originalUri = $uri = $this->getRouteUri($route);
-            $uri1 = $this->strip_optional_char($uri);
+            $uri = $this->strip_optional_char($uri);
 
-            if ($this->routeFilter && !preg_match('/^' . preg_quote($this->routeFilter, '/') . '/', $uri1)) {
+            if ($this->routeFilter && !preg_match('/^' . preg_quote($this->routeFilter, '/') . '/', $uri)) {
                 continue;
             }
 
@@ -66,9 +68,9 @@ class Generator
             $controllerName = $this->getControllerName($route->getActionName());
 
             foreach ($methods as $method) {
-                $method1 = strtoupper($method);
+                $method = strtoupper($method);
 
-                if ($method1 == 'HEAD') continue;
+                if ($method == 'HEAD') continue;
 
                 $rules = $this->getFormRules($action);
                 if (empty($rules)) {
@@ -76,10 +78,21 @@ class Generator
                 }
                 $case = $this->testCaseGenerator->generate($rules);
                 $hasAuth = $this->isAuthorizationExist($route->middleware());
-                $this->formatter->format($case, $uri1, $method1, $controllerName, $actionName, $hasAuth);
 
+                list('key' => $caseKey, 'value' => $caseValue) = $this->formatter->format(
+                    case: $case,
+                    url: $uri,
+                    method: $method,
+                    controllerName: $controllerName,
+                    actionName: $actionName,
+                    auth: $hasAuth
+                );
+
+                $cases[$caseKey] = $caseValue;
             }
         }
+
+        return $cases;
     }
 
     /**

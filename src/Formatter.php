@@ -4,7 +4,6 @@ namespace Vigneshc91\LaravelTestGenerator;
 
 class Formatter
 {
-    protected array $cases;
 
     protected string $file;
 
@@ -17,43 +16,54 @@ class Formatter
         $this->sync = $sync;
         $this->file = __DIR__ . '/Test/UserTest.php';
         $this->destinationFilePath = base_path('tests/Feature/');
-        $this->cases = [];
     }
 
-
-    public function format(array $case, string $url, string $method, string $controllerName, string $actionName, mixed $auth): void
+    /**
+     * @param array  $case
+     * @param string $url
+     * @param string $method
+     * @param string $controllerName
+     * @param string $actionName
+     * @param mixed  $auth
+     * @return array{key: string, value: array}
+     */
+    public function format(array $case, string $url, string $method, string $controllerName, string $actionName, mixed $auth): array
     {
         $testName = $controllerName . $actionName;
-        $this->cases[$testName]['action'] = $actionName;
-        $this->cases[$testName]['url'] = $url;
-        $this->cases[$testName]['method'] = $method;
-        $this->cases[$testName]['params'] = $case;
-        $this->cases[$testName]['auth'] = $auth;
-        $this->cases[$testName]['directory'] = $controllerName;
-        if (empty($this->cases[$testName]['function'])) {
-            $this->cases[$testName]['function'] = [];
-        }
 
-        $this->formatFunction($testName);
+        $res = [
+            'action' => $actionName,
+            'url' => $url,
+            'method' => $method,
+            'params' => $case,
+            'auth' => $auth,
+            'directory' => $controllerName,
+        ];
+
+        $res = $this->formatFunction($res);
+
+        $res = $this->formatFile(caseKey: $testName, caseValue: $res);
+
+        return ['key' => $testName, 'value' => $res];
     }
 
     /**
      * Generate the files for all the test cases
      */
-    public function generate()
+    public function generate(array $cases)
     {
         $this->createDirectory();
-        $this->formatFile();
+        $this->createFiles($cases);
     }
 
     /**
      * Set the function for success and failure case
      */
-    protected function formatFunction(string $testName): void
+    protected function formatFunction(array $testData): array
     {
         $functionName = '';
         $i = 0;
-        $controller = $this->cases[$testName];
+        $controller = $testData;
 
         foreach ($controller['params'] as $index => $item) {
             # Add function documentation
@@ -90,7 +100,7 @@ class Formatter
             $body .= PHP_EOL . PHP_EOL . "\t\t" . '$response->assertStatus(' . ($index == 'failure' ? '400' : '200') . ');' . PHP_EOL;
 
             # Add the function to the global array
-            $this->cases[$testName]['function'][] = [
+            $controller['function'][] = [
                 'name' => $functionName,
                 'code' => $function . PHP_EOL . "\t" . '{' . PHP_EOL . $body . PHP_EOL . "\t" . '}' . PHP_EOL,
             ];
@@ -98,27 +108,35 @@ class Formatter
             $i++;
         }
 
+        return $controller;
+    }
+
+    public function formatFile(string $caseKey, array $caseValue): array
+    {
+        $lines = file($this->file, FILE_IGNORE_NEW_LINES);
+
+        $dirName = $caseValue['directory'];
+        $namespace = "namespace Tests\Feature\\$dirName;";
+
+        $lines[2] = $namespace;
+        $lines[8] = $this->getClassName($caseKey, $lines[8]);
+        $functions = implode(PHP_EOL, array_column($caseValue['function'], 'code'));
+        $caseValue['content'] = array_merge(array_slice($lines, 0, 10), [$functions], array_slice($lines, 11));
+
+        return $caseValue;
     }
 
     /**
      * Format the test cases for the writing to the file
      */
-    protected function formatFile(): void
+    protected function createFiles(array $cases): void
     {
-        foreach ($this->cases as $key => $value) {
-            $lines = file($this->file, FILE_IGNORE_NEW_LINES);
-
-            $dirName = $value['directory'];
-            $namespace = "namespace Tests\Feature\\$dirName;";
-
-            $lines[2] = $namespace;
-            $lines[8] = $this->getClassName($key, $lines[8]);
-            $functions = implode(PHP_EOL, array_column($value['function'], 'code'));
-            $content = array_merge(array_slice($lines, 0, 10), [$functions], array_slice($lines, 11));
-
+        foreach ($cases as $keyCase => $case) {
+            $dirName = $case['directory'];
             $testDir = $this->destinationFilePath . DIRECTORY_SEPARATOR . $dirName;
             $this->createDirectory($testDir);
-            $this->writeToFile($key . 'Test', $content, $testDir);
+
+            $this->writeToFile($keyCase . 'Test', $case['content'], $testDir);
         }
     }
 
@@ -135,12 +153,10 @@ class Formatter
         echo "\033[32m" . basename($fileName) . ' Created Successfully' . PHP_EOL;
     }
 
-
     protected function getClassName(string $testName, string $line): string
     {
         return str_replace('UserTest', $testName . 'Test', $line);
     }
-
 
     protected function getParams(array $param): string
     {
