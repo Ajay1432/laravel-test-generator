@@ -11,7 +11,7 @@
     "require": {
         "php": "^7.3|^8.0",
         "ext-json": "*",
-        "fzaninotto/faker": "^1.8",
+        "fakerphp/faker": "^1.9.1",
         "laravel/framework": "^8.18",
         "phpunit/phpunit": "^9.0"
     },
