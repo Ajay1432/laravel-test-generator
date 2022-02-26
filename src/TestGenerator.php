@@ -1,6 +1,6 @@
 <?php
 
-namespace Vigneshc91\LaravelTestGenerator;
+namespace AjayMakwana\LaravelTestGenerator;
 
 use Illuminate\Console\Command;
 

@@ -1,5 +1,5 @@
 {
-    "name": "vigneshc91/laravel-test-generator",
+    "name": "ajay-makwana/laravel-test-generator",
     "description": "Laravel package for generating unit test automatically",
     "license": "MIT",
     "authors": [
@@ -17,13 +17,13 @@
     },
     "autoload": {
         "psr-4": {
-            "Vigneshc91\\LaravelTestGenerator\\": "src/"
+            "AjayMakwana\\LaravelTestGenerator\\": "src/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Vigneshc91\\LaravelTestGenerator\\TestGeneratorServiceProvider"
+                "AjayMakwana\\LaravelTestGenerator\\TestGeneratorServiceProvider"
             ]
         }
     }

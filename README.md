@@ -4,9 +4,9 @@ Auto generate the unit test file for the available routes
 
 ## Installation
 
-The package can easily be installed by running `composer require vigneshc91/laravel-test-generator` in your project's root folder.
+The package can easily be installed by running `composer require ajay-makwana/laravel-test-generator` in your project's root folder.
 
-If you are running a version of Laravel < 5.5 also make sure you add `Vigneshc91\LaravelTestGenerator\TestGeneratorServiceProvider::class` to the `providers` array in `config/app.php`.
+If you are running a version of Laravel < 5.5 also make sure you add `AjayMakwana\LaravelTestGenerator\TestGeneratorServiceProvider::class` to the `providers` array in `config/app.php`.
 
 This will register the artisan command that will be available to you.
 
