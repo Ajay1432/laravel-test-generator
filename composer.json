@@ -4,12 +4,12 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "Vignesh C",
-            "email": "vignesh.jag@gmail.com"
+            "name": "Ajay Makwana",
+            "email": "ajayvmakwana1432@gmail.com"
         }
     ],
     "require": {
-        "php": "^8.0",
+        "php": "^7.3|^8.0",
         "ext-json": "*",
         "fzaninotto/faker": "^1.8",
         "laravel/framework": "^8.18",
